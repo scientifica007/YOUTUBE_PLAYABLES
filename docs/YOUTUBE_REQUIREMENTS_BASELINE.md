@@ -29,12 +29,12 @@ The Playables SDK must be loaded before any game code:
 
 Required/relevant lifecycle APIs include:
 
-- `ytgame.game.firstFrameReady()` — must be called before `gameReady()` when the first frame is ready to render.
+- `ytgame.game.firstFrameReady()` — must be called before `gameReady()` when the first frame/loading UI is ready to render.
 - `ytgame.game.gameReady()` — must be called only when the game is actually interactable; YouTube keeps its loading spinner until this call.
 - `ytgame.IN_PLAYABLES_ENV` — detects the Playables environment when the SDK is present.
 - `ytgame.game.loadData()` / `ytgame.game.saveData(data)` — cloud save path.
-- `ytgame.system.onPause()` / `ytgame.system.onResume()` — lifecycle integration.
-- `ytgame.system.isAudioEnabled()` / `onAudioEnabledChange()` — required if audio is present.
+- `ytgame.system.onPause()` / `ytgame.system.onResume()` — mandatory lifecycle integration.
+- `ytgame.system.isAudioEnabled()` / `onAudioEnabledChange()` — mandatory if audio is present.
 
 Recommended/relevant APIs include:
 
@@ -43,7 +43,12 @@ Recommended/relevant APIs include:
 - health logging APIs;
 - ad APIs if monetization features are later implemented.
 
-Important cloud-save ordering: if cloud save is used, the game must wait for `loadData()` to complete before calling `saveData()`.
+Important integration rules:
+
+- `loadData()` must complete successfully before `saveData()` is called;
+- if `sendScore()` is used, the submitted best score must match the best score in the game save;
+- after `onPause()` the game must pause execution and resume only after `onResume()`;
+- the game **must not use the Page Visibility API or similar web APIs for pause/resume**; the Playables lifecycle callbacks are authoritative.
 
 ## 3. Localization
 
@@ -70,7 +75,7 @@ The game must:
 
 Official examples explicitly include extreme aspect ratios from tall portrait through ultrawide landscape.
 
-Keyboard support for directional/text input is recommended where applicable.
+Keyboard support for directional/text input is recommended where applicable. Escape handling must not be intercepted with `preventDefault()`.
 
 ## 5. Stability and performance limits
 
@@ -88,7 +93,23 @@ Current published values:
 
 The initial bundle is measured through the point at which the game calls `gameReady()`.
 
-## 6. Trust, safety, and rights
+## 6. Privacy and data architecture
+
+Current requirements materially constrain game architecture:
+
+- the game must not make external calls to URLs/services except where required by Google/YouTube technical requirements;
+- the game must not attempt to bypass external-call restrictions;
+- the game must not collect or prompt for personal information such as name, age, location, username, or password;
+- the game must not display login/account-creation UI;
+- clipboard access is prohibited except in response to an explicit paste action;
+- QR-code-like content is prohibited;
+- obfuscation is prohibited, although ordinary minification is allowed;
+- Playables must be implemented as single-page applications;
+- YouTube may reject games whose code cannot be evaluated because of features such as WASM, `eval()`, or Web Workers.
+
+Experiment 001 therefore uses no backend, analytics service, external asset CDN, login, personal data, WebAssembly, workers, or `eval()`.
+
+## 7. Trust, safety, and rights
 
 Current requirements include:
 
@@ -99,9 +120,15 @@ Current requirements include:
 - third-party IP, trademark, music, and personality rights must be cleared;
 - duplicate/substantially identical Playable uploads are prohibited under the current duplicate-content policy.
 
-Experiment 001 uses generated programmatic graphics and no music or third-party game assets to minimize rights risk.
+Experiment 001 uses programmatic graphics and no music or third-party game assets to minimize rights risk.
 
-## 7. Disallowed/confusing UX elements
+## 8. Accessibility
+
+Current guidance asks developers to make a best effort toward WCAG AA and supports Accessible Gaming Initiative (AGI) discovery tags. Accessibility tags must not misrepresent actual game functionality.
+
+Experiment 001 uses native buttons, visible focus states, non-hover-dependent interaction, large touch targets, and text alternatives for panel patterns. Accessibility remains a review item, not a completed certification claim.
+
+## 9. Disallowed/confusing UX elements
 
 Current design requirements include:
 
@@ -114,7 +141,7 @@ Current design requirements include:
 - developer/publisher metadata is required at publishing time;
 - thumbnails/title/description must not add prohibited branding/logos under the current design rules.
 
-## 8. Experiment 001 implementation policy
+## 10. Experiment 001 implementation policy
 
 Until official Test Suite access and certification evidence exist, this repository will distinguish clearly between:
 
@@ -136,6 +163,7 @@ No local implementation will be described as “YouTube certified” without off
 - Stability/performance: https://developers.google.com/youtube/gaming/playables/certification/requirements_stability
 - Integration: https://developers.google.com/youtube/gaming/playables/certification/requirements_integration
 - Design: https://developers.google.com/youtube/gaming/playables/certification/requirements_design
+- Privacy/data: https://developers.google.com/youtube/gaming/playables/certification/requirements_privacydata
 - i18n/L10n: https://developers.google.com/youtube/gaming/playables/certification/requirements_i18n_l10n
 - Accessibility: https://developers.google.com/youtube/gaming/playables/certification/requirements_accessibility
 - Trust & Safety: https://developers.google.com/youtube/gaming/playables/certification/requirements_trustsafety
