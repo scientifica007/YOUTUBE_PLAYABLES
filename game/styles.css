@@ -536,3 +536,168 @@ h2 {
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* Android landscape compact layout */
+@media (orientation: landscape) and (max-height: 640px) {
+  .app-shell {
+    min-height: 100dvh;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar > div:first-child {
+    min-width: 0;
+  }
+
+  .eyebrow,
+  .section-kicker {
+    margin-bottom: 2px;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  h2 {
+    margin-bottom: 4px;
+    font-size: 1.12rem;
+    line-height: 1.05;
+  }
+
+  .score-cluster {
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .score-chip,
+  .timer-box {
+    min-width: 56px;
+    padding: 5px 7px;
+    border-radius: 9px;
+  }
+
+  .score-label,
+  .timer-label {
+    font-size: 0.56rem;
+  }
+
+  .score-chip strong,
+  .timer-box strong {
+    font-size: 0.9rem;
+  }
+
+  .screen {
+    flex: 0 0 auto;
+  }
+
+  .intro-panel,
+  .result-panel {
+    max-width: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .intro-copy {
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+
+  .rules-list {
+    margin: 6px 0 8px;
+    padding-inline-start: 1rem;
+    font-size: 0.76rem;
+    line-height: 1.2;
+  }
+
+  .rules-list li + li {
+    margin-top: 2px;
+  }
+
+  .primary-button {
+    min-height: 38px;
+    padding: 7px 12px;
+    border-radius: 9px;
+  }
+
+  .status-line {
+    margin-top: 5px;
+    font-size: 0.68rem;
+  }
+
+  .round-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .round-header > div:first-child {
+    min-width: 0;
+  }
+
+  .round-header h2 {
+    margin-bottom: 0;
+  }
+
+  .timer-box {
+    flex: 0 0 auto;
+  }
+
+  .progress-track {
+    height: 5px;
+    margin: 0 0 4px;
+  }
+
+  .inspection-board {
+    gap: 4px;
+  }
+
+  .panel-button {
+    min-height: clamp(40px, 11dvh, 52px);
+    padding: 4px;
+    border-radius: 8px;
+  }
+
+  .indicator-strip {
+    width: min(100%, 150px);
+    grid-template-columns: repeat(var(--cells, 4), minmax(4px, 1fr));
+    gap: 3px;
+  }
+
+  .indicator-cell {
+    border-radius: 3px;
+  }
+
+  .feedback {
+    min-height: 0.9em;
+    margin-top: 3px;
+    font-size: 0.68rem;
+  }
+
+  .result-score {
+    margin: 3px 0 8px;
+    padding: 8px 10px;
+  }
+
+  .result-score strong {
+    font-size: 2rem;
+  }
+
+  .footer-note {
+    display: none;
+  }
+}
