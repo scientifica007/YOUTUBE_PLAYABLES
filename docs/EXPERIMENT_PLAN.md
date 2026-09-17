@@ -29,7 +29,7 @@ The first experiment is optimized for learning platform constraints rather than 
 - `firstFrameReady` / `gameReady` lifecycle;
 - `loadData` / `saveData`;
 - `sendScore`;
-- pause/resume behavior;
+- Playables pause/resume callbacks;
 - touch and mouse interaction;
 - responsive layout across extreme aspect ratios;
 - bundle size and file-count constraints;
@@ -56,9 +56,10 @@ Exit criteria:
 - start → rounds → game-over → replay works;
 - mouse and touch work;
 - resize does not reset the run;
-- pause/resume freezes the timer correctly;
+- local development persistence works;
 - no external game assets;
-- local validator passes.
+- local validator passes;
+- packaging produces a ZIP with root `index.html`.
 
 Status: **IMPLEMENTED, pending physical/browser test.**
 
@@ -79,11 +80,13 @@ Status: **NOT STARTED.**
 Exit criteria:
 
 - Playables Test Suite recognizes SDK integration;
-- lifecycle checks pass;
-- save/load checks pass;
-- pause/resume checks pass;
-- score integration passes where testable;
-- no prohibited/unsupported calls detected.
+- `firstFrameReady` and `gameReady` behavior passes;
+- `loadData` completes before any Playables `saveData` call;
+- best score submitted through `sendScore` matches the saved best score;
+- active timers and pending transitions freeze after `onPause`;
+- execution resumes only after `onResume`;
+- no Page Visibility API is used for lifecycle control;
+- no prohibited/unsupported calls are detected.
 
 Status: **NOT STARTED.**
 
