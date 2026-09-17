@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Inspection Sprint</title>
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- YouTube Playables SDK MUST load before any game code. -->
+  <script src="https://www.youtube.com/game_api/v1"></script>
+  <script defer src="./src/youtube_adapter.js"></script>
+  <script defer src="./src/game.js"></script>
+</head>
+<body>
+  <main id="app" class="app-shell" aria-labelledby="game-title">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">EXPERIMENT 001</p>
+        <h1 id="game-title">Inspection Sprint</h1>
+      </div>
+      <div class="score-cluster" aria-label="Score information">
+        <div class="score-chip">
+          <span class="score-label">Score</span>
+          <strong id="score-value">0</strong>
+        </div>
+        <div class="score-chip">
+          <span class="score-label">Best</span>
+          <strong id="best-value">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <section id="menu-screen" class="screen" aria-labelledby="menu-heading">
+      <div class="intro-panel">
+        <p class="section-kicker">Rapid visual audit</p>
+        <h2 id="menu-heading">Find the panel that breaks the standard.</h2>
+        <p class="intro-copy">Every round contains one anomalous panel. Identify it before the timer expires. The board becomes denser as you progress.</p>
+        <ul class="rules-list">
+          <li>Correct answer: base points + speed bonus.</li>
+          <li>Wrong answer: score penalty, then keep inspecting.</li>
+          <li>Resize or rotate without losing the active run.</li>
+        </ul>
+        <button id="start-button" class="primary-button" type="button" disabled aria-describedby="boot-status">Preparing…</button>
+        <p id="boot-status" class="status-line" aria-live="polite">Initializing platform adapter…</p>
+      </div>
+    </section>
+
+    <section id="game-screen" class="screen" hidden aria-labelledby="round-title">
+      <div class="round-header">
+        <div>
+          <p id="round-label" class="section-kicker">Round 1 / 10</p>
+          <h2 id="round-title">One panel is different.</h2>
+        </div>
+        <div class="timer-box" aria-label="Time remaining">
+          <span class="timer-label">Time</span>
+          <strong id="timer-value">7.0</strong>
+        </div>
+      </div>
+
+      <div class="progress-track" aria-hidden="true">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+
+      <div id="board" class="inspection-board" role="group" aria-label="Inspection panels"></div>
+      <p id="round-feedback" class="feedback" aria-live="polite"></p>
+    </section>
+
+    <section id="result-screen" class="screen" hidden aria-labelledby="result-title">
+      <div class="result-panel">
+        <p class="section-kicker">Run complete</p>
+        <h2 id="result-title">Inspection finished.</h2>
+        <div class="result-score">
+          <span>Final score</span>
+          <strong id="final-score">0</strong>
+        </div>
+        <p id="result-summary" class="intro-copy">Your score has been recorded for this experiment.</p>
+        <button id="replay-button" class="primary-button" type="button">Run again</button>
+      </div>
+    </section>
+
+    <footer class="footer-note">
+      <span>No audio · touch + mouse · responsive prototype</span>
+      <span id="runtime-badge">Local mode</span>
+    </footer>
+  </main>
+</body>
+</html>
