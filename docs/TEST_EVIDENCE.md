@@ -226,3 +226,52 @@ This correction is **RETEST REQUIRED**. Gate 1 must not pass until the updated l
 - Android landscape: **RETEST REQUIRED after commit `88805d9bdf4c6972c12f08110b0b8c0c51e7e82c`.**
 
 Gate 1 status: **RETEST REQUIRED — ANDROID LANDSCAPE FIX PENDING PHYSICAL VERIFICATION.**
+
+
+## Session 2026-09-18 — Android landscape retest after fix 2
+
+The project owner physically retested the second landscape correction on Android in both Brave and Chrome and supplied a new Google Drive screenshot set.
+
+Owner-reported results:
+
+- **Landscape start screen:** PASS.
+- **Landscape Round 1 (9 panels):** PASS.
+- **Landscape Rounds 4–6 (12 panels):** PASS.
+- **Landscape Rounds 7–10 (16 panels):** **FAIL** — the complete dense 4×4 board is not fully visible simultaneously.
+- **Touch in landscape:** PASS.
+- **Landscape → Portrait rotation without reset:** PASS.
+- **Portrait Rounds 7–10:** PASS — all 16 panels remain visible after rotation back to portrait.
+- **Validator after landscape fix 2:** PASS.
+- **Packaging after landscape fix 2:** PASS.
+- **Browsers tested:** Brave and Chrome.
+
+Visual review of the supplied screenshots confirms that the second landscape correction substantially improved the layout: Rounds 1–6 fit correctly, while Rounds 7–10 still clip the bottom edge of the fourth row in the available browser viewport. This remains gameplay-blocking because the timed visual-comparison mechanic requires all 16 choices to be simultaneously inspectable.
+
+### Landscape corrective implementation v3
+
+A third, narrower landscape correction was committed after this physical retest.
+
+Correction commit: `05f0e76a4f5d84bddf278330a6ce38c5e6301a76`.
+
+The v3 change preserves the successful portrait rules and further reduces only the short-height landscape footprint by:
+
+- removing the nonessential experiment eyebrow from the landscape top bar;
+- reducing shell padding/gaps and score-chip footprint;
+- placing the round label and round title on one compact line;
+- reducing timer/progress vertical footprint;
+- reducing dense-board gaps and panel height while preserving large horizontal touch targets;
+- hiding empty feedback space;
+- retaining the nonessential footer suppression.
+
+This correction is **RETEST REQUIRED**. No Gate 1 PASS may be declared until a physical Android retest verifies that all 16 panels are completely visible simultaneously in Rounds 7–10 in landscape, while portrait and rotation-state preservation remain intact.
+
+### Current Gate 1 status after landscape fix 3
+
+- Desktop/local suite: PASS.
+- Android portrait: PASS.
+- Android touch: PASS.
+- Android orientation-state preservation: PASS.
+- Android landscape Rounds 1–6: PASS.
+- Android landscape Rounds 7–10: **RETEST REQUIRED after commit `05f0e76a4f5d84bddf278330a6ce38c5e6301a76`.**
+
+Gate 1 status: **RETEST REQUIRED — DENSE LANDSCAPE BOARD FIX PENDING PHYSICAL VERIFICATION.**
