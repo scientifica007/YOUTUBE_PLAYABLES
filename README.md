@@ -16,9 +16,10 @@ A short pattern-inspection game: one panel violates the standard and the player 
 - Official YouTube Playables requirements snapshot recorded in `docs/YOUTUBE_REQUIREMENTS_BASELINE.md`.
 - Experiment plan recorded in `docs/EXPERIMENT_PLAN.md`.
 - Technical decisions recorded in `docs/DECISIONS.md`.
+- Gate 1 manual test protocol recorded in `docs/MANUAL_TEST_PROTOCOL.md`.
 - First playable browser prototype added under `game/`.
 - YouTube Playables SDK adapter included with local fallback behavior.
-- Local bundle validator added under `tools/`.
+- Local bundle validator and ZIP packager added under `tools/`.
 
 This is a **technical prototype**, not yet a submission candidate.
 
@@ -46,6 +47,30 @@ python3 tools/validate_bundle.py game
 
 The validator checks the local hard limits we can verify without the YouTube Developer Portal/Test Suite: file count, individual file size, total uncompressed size, filename characters, root `index.html`, and SDK-before-game-code ordering.
 
+## Build the ZIP
+
+```bash
+python3 tools/package_game.py
+```
+
+This validates first, then creates:
+
+```text
+build/inspection-sprint-exp001.zip
+```
+
+The archive is built with `index.html` at the ZIP root.
+
+## Manual Gate 1 testing
+
+Follow:
+
+```text
+docs/MANUAL_TEST_PROTOCOL.md
+```
+
+Gate 1 is not considered passed until desktop, Android, resize, pause/resume, persistence, validator, and packaging evidence are collected.
+
 ## Repository structure
 
 ```text
@@ -55,6 +80,7 @@ The validator checks the local hard limits we can verify without the YouTube Dev
 ├── docs/
 │   ├── DECISIONS.md
 │   ├── EXPERIMENT_PLAN.md
+│   ├── MANUAL_TEST_PROTOCOL.md
 │   └── YOUTUBE_REQUIREMENTS_BASELINE.md
 ├── game/
 │   ├── index.html
@@ -63,6 +89,7 @@ The validator checks the local hard limits we can verify without the YouTube Dev
 │       ├── game.js
 │       └── youtube_adapter.js
 └── tools/
+    ├── package_game.py
     └── validate_bundle.py
 ```
 
