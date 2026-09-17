@@ -61,7 +61,7 @@ Exit criteria:
 - local validator passes;
 - packaging produces a ZIP with root `index.html`.
 
-Status: **IMPLEMENTED, pending physical/browser test.**
+Status: **PARTIALLY EVIDENCED / RETEST REQUIRED — desktop local boot and one complete run are visually verified; remaining mandatory checks are recorded in `docs/TEST_EVIDENCE.md` and `docs/MANUAL_TEST_PROTOCOL.md`.**
 
 ### Gate 2 — Gameplay quality
 
