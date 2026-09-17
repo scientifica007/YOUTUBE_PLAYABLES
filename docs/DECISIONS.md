@@ -51,3 +51,9 @@ Decision log for the YouTube Playables experiment.
 **Decision:** A technically valid prototype does not automatically become the final game concept.
 
 **Reason:** First prove the end-to-end Playables path. Only then decide whether to deepen `Inspection Sprint` or replace it with a more commercially compelling original game while retaining the validated platform architecture.
+
+## D-009 — Treat Playables privacy and lifecycle rules as architecture constraints
+
+**Decision:** The game bundle will contain no external service calls beyond the required YouTube Playables SDK, and game pause/resume will be driven only by `ytgame.system.onPause()` / `onResume()` inside Playables. The Page Visibility API will not be used as a lifecycle substitute.
+
+**Reason:** These are certification-level platform constraints, not optional implementation preferences. Enforcing them in the architecture and local preflight reduces the risk of discovering structural non-compliance only at certification time.
