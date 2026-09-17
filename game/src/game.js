@@ -39,15 +39,13 @@
     deadline: 0,
     remainingMs: ROUND_DURATION_MS,
     timerHandle: null,
+    transitionHandle: null,
+    pendingAdvance: false,
     saveVersion: 1,
   };
 
   function randomInt(maxExclusive) {
     return Math.floor(Math.random() * maxExclusive);
-  }
-
-  function patternKey(pattern) {
-    return pattern.join("");
   }
 
   function makeBasePattern(length) {
@@ -147,7 +145,6 @@
     const config = roundConfig(roundNumber);
     const base = makeBasePattern(config.patternLength);
     const anomaly = makeAnomaly(base);
-    const anomalyKey = patternKey(anomaly);
 
     state.anomalyIndex = randomInt(config.panelCount);
     els.board.innerHTML = "";
@@ -157,9 +154,7 @@
     for (let index = 0; index < config.panelCount; index += 1) {
       const isAnomaly = index === state.anomalyIndex;
       const pattern = isAnomaly ? anomaly : base;
-      const button = renderPanel(index, pattern, isAnomaly);
-      button.dataset.patternKey = isAnomaly ? anomalyKey : patternKey(base);
-      els.board.appendChild(button);
+      els.board.appendChild(renderPanel(index, pattern, isAnomaly));
     }
   }
 
@@ -167,6 +162,13 @@
     if (state.timerHandle !== null) {
       clearInterval(state.timerHandle);
       state.timerHandle = null;
+    }
+  }
+
+  function clearTransition() {
+    if (state.transitionHandle !== null) {
+      clearTimeout(state.transitionHandle);
+      state.transitionHandle = null;
     }
   }
 
@@ -207,6 +209,19 @@
     if (target) target.classList.add("reveal");
   }
 
+  function scheduleAdvance(delayMs) {
+    clearTransition();
+    state.transitionHandle = window.setTimeout(() => {
+      state.transitionHandle = null;
+      if (!state.active) return;
+      if (state.paused) {
+        state.pendingAdvance = true;
+        return;
+      }
+      advanceRound();
+    }, delayMs);
+  }
+
   function handlePanelChoice(button) {
     if (!state.active || state.paused || !state.acceptingInput) return;
 
@@ -220,7 +235,7 @@
       button.classList.add("correct");
       setFeedback(`Correct. +${earned} points.`, "good");
       updateScore();
-      window.setTimeout(advanceRound, 420);
+      scheduleAdvance(420);
       return;
     }
 
@@ -236,13 +251,13 @@
     disableBoard();
     revealAnomaly();
     setFeedback("Time expired. The anomaly is highlighted.", "bad");
-    window.setTimeout(advanceRound, 700);
+    scheduleAdvance(700);
   }
 
   function renderRound() {
     const roundNumber = state.round + 1;
     state.acceptingInput = true;
-    state.paused = false;
+    state.pendingAdvance = false;
     els.roundLabel.textContent = `Round ${roundNumber} / ${ROUND_COUNT}`;
     setFeedback("");
     buildBoard();
@@ -253,7 +268,7 @@
     if (!state.active) return;
     state.round += 1;
     if (state.round >= ROUND_COUNT) {
-      finishRun();
+      void finishRun();
       return;
     }
     renderRound();
@@ -261,8 +276,10 @@
 
   async function finishRun() {
     stopTimer();
+    clearTransition();
     state.active = false;
     state.acceptingInput = false;
+    state.pendingAdvance = false;
     state.totalRuns += 1;
 
     const previousBest = state.bestScore;
@@ -284,11 +301,14 @@
   }
 
   function startRun() {
+    stopTimer();
+    clearTransition();
     state.score = 0;
     state.round = 0;
     state.active = true;
     state.paused = false;
     state.acceptingInput = true;
+    state.pendingAdvance = false;
     updateScore();
     setScreen("game");
     renderRound();
@@ -297,8 +317,10 @@
   function pauseRun() {
     if (!state.active || state.paused) return;
     state.paused = true;
-    state.remainingMs = Math.max(0, state.deadline - performance.now());
-    stopTimer();
+    if (state.acceptingInput) {
+      state.remainingMs = Math.max(0, state.deadline - performance.now());
+      stopTimer();
+    }
     setFeedback("Paused by platform.");
     void persistMeta();
   }
@@ -307,7 +329,16 @@
     if (!state.active || !state.paused) return;
     state.paused = false;
     setFeedback("");
-    startTimer(state.remainingMs);
+
+    if (state.pendingAdvance) {
+      state.pendingAdvance = false;
+      advanceRound();
+      return;
+    }
+
+    if (state.acceptingInput) {
+      startTimer(state.remainingMs);
+    }
   }
 
   function installEvents() {
@@ -338,9 +369,6 @@
     const rawSave = await platform.loadData();
     applySave(rawSave);
     updateScore();
-
-    // Locale is obtained only through the Playables SDK. English remains the baseline UI.
-    await platform.getLanguage();
 
     els.start.disabled = false;
     els.start.textContent = "Start inspection";
