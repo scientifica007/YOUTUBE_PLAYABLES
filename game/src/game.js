@@ -99,7 +99,7 @@
   }
 
   async function persistMeta() {
-    await platform.saveData(serializeSave());
+    return platform.saveData(serializeSave());
   }
 
   function applySave(raw) {
@@ -283,20 +283,26 @@
     state.totalRuns += 1;
 
     const previousBest = state.bestScore;
-    if (state.score > state.bestScore) {
+    const isNewBest = state.score > previousBest;
+    if (isNewBest) {
       state.bestScore = state.score;
     }
 
     updateScore();
     els.finalScore.textContent = String(state.score);
-    els.resultSummary.textContent = state.score > previousBest
-      ? "New best score. It has been saved."
+    els.resultSummary.textContent = isNewBest
+      ? "New best score. Saving…"
       : `Best score: ${state.bestScore}.`;
     setScreen("result");
 
-    await persistMeta();
-    if (state.bestScore > previousBest) {
-      await platform.sendScore(state.bestScore);
+    const saved = await persistMeta();
+    if (isNewBest) {
+      if (saved) {
+        els.resultSummary.textContent = "New best score saved.";
+        await platform.sendScore(state.bestScore);
+      } else {
+        els.resultSummary.textContent = "New best score for this session; save is unavailable.";
+      }
     }
   }
 
