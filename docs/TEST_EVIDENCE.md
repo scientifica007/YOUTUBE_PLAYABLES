@@ -154,3 +154,75 @@ The evidence above does **not** prove and must not be used to infer:
 - Playables `onPause` / `onResume` lifecycle behavior;
 - YouTube cloud save/load behavior;
 - `sendScore` behavior inside Playables.
+
+
+## Session 2026-09-18 — Android retest after portrait correction
+
+The project owner reran the updated branch on the same physical Android phone using both Brave and Chrome after the portrait-responsive correction.
+
+### Updated local preflight/package evidence
+
+Commands rerun after the portrait CSS change:
+
+```bash
+python3 tools/validate_bundle.py game
+python3 tools/package_game.py
+```
+
+Observed results:
+
+- validator: **PASS**;
+- bundle files: `4 / 8000`;
+- uncompressed bundle size: `27.5 KiB / 250 MiB`;
+- no forbidden locale/Page Visibility patterns found;
+- no unexpected external URLs found;
+- package creation: **PASS**;
+- archive: `build/inspection-sprint-exp001.zip`;
+- archive files: `4`;
+- archive size: `8464 bytes`.
+
+The phone again fetched the required page/resources successfully over LAN. The repeated `/favicon.ico` 404 remains non-blocking.
+
+### Physical Android retest results
+
+Owner-reported results after the portrait correction:
+
+- **Portrait start screen:** PASS — `Start inspection` visible and usable.
+- **Portrait Round 1 (3×3):** PASS — complete board visible.
+- **Portrait Rounds 4–6 (12 panels):** PASS — complete board visible and usable.
+- **Portrait Rounds 7–10 (16 panels):** PASS — all 16 panels visible simultaneously.
+- **Touch after fix:** PASS.
+- **Orientation change without state reset:** PASS.
+- **Browsers tested:** Brave and Chrome.
+- **Landscape after fix:** **FAIL**.
+
+Drive screenshot review confirms the portrait correction is effective. Portrait now presents the complete late-round board in the usable viewport.
+
+The remaining Android blocker is landscape layout. After rotation to landscape, the layout retains desktop-scale vertical sizing: the start/menu panel and, more importantly, dense gameplay boards extend below the usable viewport. The owner reports that the lower portion cannot be reached by scrolling. This makes landscape gameplay incomplete even though rotation itself preserves the active score/round state.
+
+### Landscape corrective implementation
+
+A second narrow responsive correction was committed specifically for short-height landscape mobile viewports.
+
+Correction commit: `88805d9bdf4c6972c12f08110b0b8c0c51e7e82c`.
+
+The change adds an `orientation: landscape` + short-viewport layout that:
+
+- compacts shell spacing and the title/score top bar;
+- compacts round title/timer/progress;
+- reduces intro/result typography and spacing so the primary action remains reachable;
+- reduces dense-board panel height and gaps enough for four-row boards;
+- keeps touch-sized targets while shrinking indicator spacing;
+- hides the nonessential footer in short landscape viewports.
+
+This correction is **RETEST REQUIRED**. Gate 1 must not pass until the updated landscape build is physically verified on Android.
+
+### Current Gate 1 status
+
+- Desktop/local suite: PASS.
+- Android portrait: PASS.
+- Android touch: PASS.
+- Android rotation state preservation: PASS.
+- Android landscape: **RETEST REQUIRED after commit `88805d9bdf4c6972c12f08110b0b8c0c51e7e82c`.**
+
+Gate 1 status: **RETEST REQUIRED — ANDROID LANDSCAPE FIX PENDING PHYSICAL VERIFICATION.**
