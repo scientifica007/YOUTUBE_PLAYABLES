@@ -68,27 +68,7 @@ Expected:
 - all panels remain tappable/clickable;
 - no page-level horizontal overflow blocks play.
 
-## C. Pause/resume
-
-During an active round in local mode:
-
-1. switch to another browser tab long enough to notice the timer pause;
-2. return to the game tab.
-
-Expected:
-
-- timer does not consume hidden-tab time;
-- round resumes from approximately the remaining time;
-- no duplicate round advance occurs.
-
-Repeat once immediately after a correct answer, during the short transition before the next round.
-
-Expected:
-
-- game does not begin timing the next round while paused;
-- exactly one next round appears after resume.
-
-## D. Mouse and touch
+## C. Mouse and touch
 
 ### Desktop mouse
 
@@ -106,7 +86,7 @@ Expected:
 - portrait and landscape both remain playable;
 - orientation change does not reset the run.
 
-## E. Local static preflight
+## D. Local static preflight
 
 Run:
 
@@ -132,6 +112,19 @@ Expected:
 - ZIP is created at `build/inspection-sprint-exp001.zip`;
 - `index.html` is at the ZIP archive root, not nested under `game/`.
 
+## E. Lifecycle testing belongs to the Playables Test Suite gate
+
+Do **not** test pause/resume by using the browser Page Visibility API or by treating tab switching as an equivalent substitute. Current YouTube Playables integration requirements explicitly require `ytgame.system.onPause()` / `onResume()` and prohibit Page Visibility APIs for game pause/resume behavior.
+
+At Gate 3, the official Playables Test Suite must verify that:
+
+- active round timing freezes on `onPause()`;
+- pending round-transition timers also freeze;
+- input does not advance game state while paused;
+- execution resumes only after `onResume()`;
+- cloud load completes before cloud save;
+- submitted best score matches the saved best score.
+
 ## F. Gate 1 verdict
 
 Gate 1 can be marked **PASS** only after all of the following are evidenced:
@@ -140,10 +133,9 @@ Gate 1 can be marked **PASS** only after all of the following are evidenced:
 - full loop PASS;
 - persistence PASS;
 - resize/state PASS;
-- local pause/resume PASS;
 - mouse PASS;
 - Android touch/orientation PASS;
 - validator PASS;
 - ZIP packaging PASS.
 
-Official YouTube SDK Test Suite compliance belongs to Gate 3 and must not be inferred from these local tests.
+Lifecycle/SDK compliance remains **UNVERIFIED** until Gate 3. Official YouTube SDK Test Suite compliance must not be inferred from local browser tests.
