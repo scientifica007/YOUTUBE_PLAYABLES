@@ -40,7 +40,9 @@
     remainingMs: ROUND_DURATION_MS,
     timerHandle: null,
     transitionHandle: null,
-    pendingAdvance: false,
+    transitionDeadline: 0,
+    transitionRemainingMs: 0,
+    transitionPaused: false,
     saveVersion: 1,
   };
 
@@ -170,6 +172,9 @@
       clearTimeout(state.transitionHandle);
       state.transitionHandle = null;
     }
+    state.transitionDeadline = 0;
+    state.transitionRemainingMs = 0;
+    state.transitionPaused = false;
   }
 
   function renderTimer() {
@@ -211,15 +216,15 @@
 
   function scheduleAdvance(delayMs) {
     clearTransition();
+    state.transitionRemainingMs = Math.max(0, delayMs);
+    state.transitionDeadline = performance.now() + state.transitionRemainingMs;
     state.transitionHandle = window.setTimeout(() => {
       state.transitionHandle = null;
-      if (!state.active) return;
-      if (state.paused) {
-        state.pendingAdvance = true;
-        return;
-      }
+      state.transitionDeadline = 0;
+      state.transitionRemainingMs = 0;
+      if (!state.active || state.paused) return;
       advanceRound();
-    }, delayMs);
+    }, state.transitionRemainingMs);
   }
 
   function handlePanelChoice(button) {
@@ -257,7 +262,6 @@
   function renderRound() {
     const roundNumber = state.round + 1;
     state.acceptingInput = true;
-    state.pendingAdvance = false;
     els.roundLabel.textContent = `Round ${roundNumber} / ${ROUND_COUNT}`;
     setFeedback("");
     buildBoard();
@@ -265,7 +269,7 @@
   }
 
   function advanceRound() {
-    if (!state.active) return;
+    if (!state.active || state.paused) return;
     state.round += 1;
     if (state.round >= ROUND_COUNT) {
       void finishRun();
@@ -279,7 +283,6 @@
     clearTransition();
     state.active = false;
     state.acceptingInput = false;
-    state.pendingAdvance = false;
     state.totalRuns += 1;
 
     const previousBest = state.bestScore;
@@ -314,7 +317,6 @@
     state.active = true;
     state.paused = false;
     state.acceptingInput = true;
-    state.pendingAdvance = false;
     updateScore();
     setScreen("game");
     renderRound();
@@ -323,10 +325,23 @@
   function pauseRun() {
     if (!state.active || state.paused) return;
     state.paused = true;
+
     if (state.acceptingInput) {
       state.remainingMs = Math.max(0, state.deadline - performance.now());
       stopTimer();
     }
+
+    if (state.transitionHandle !== null) {
+      state.transitionRemainingMs = Math.max(
+        0,
+        state.transitionDeadline - performance.now(),
+      );
+      clearTimeout(state.transitionHandle);
+      state.transitionHandle = null;
+      state.transitionDeadline = 0;
+      state.transitionPaused = true;
+    }
+
     setFeedback("Paused by platform.");
     void persistMeta();
   }
@@ -336,9 +351,10 @@
     state.paused = false;
     setFeedback("");
 
-    if (state.pendingAdvance) {
-      state.pendingAdvance = false;
-      advanceRound();
+    if (state.transitionPaused) {
+      const delay = state.transitionRemainingMs;
+      state.transitionPaused = false;
+      scheduleAdvance(delay);
       return;
     }
 
