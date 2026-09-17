@@ -106,16 +106,51 @@ Verdict: **Local ZIP packaging — PASS.**
 
 This evidence proves that the local packaging path executes successfully. It does not yet prove Developer Portal upload or official certification acceptance.
 
-### Not yet verified by this evidence
+## Session 2026-09-17 — Android physical browser
 
-The supplied evidence does **not** yet prove the following and no PASS should be inferred for them:
+The project owner tested the local server from an Android phone over the same LAN using both **Brave** and **Chrome**. The server log shows the phone successfully fetched `/`, `/styles.css`, `/src/youtube_adapter.js`, and `/src/game.js` with HTTP `200`, so network delivery and resource loading were successful. The repeated `/favicon.ico` `404` remained non-blocking.
 
-- touch input on a physical Android device;
-- Android portrait/landscape behavior and orientation-change state preservation;
+A Google Drive evidence folder supplied by the owner contains the Android screenshots from this session. Visual review shows that landscape gameplay is usable, while portrait layout consumes excessive vertical space; the start screen extends below the visible area and later denser rounds do not present the complete board within the usable portrait viewport.
+
+Owner-reported device results:
+
+- **Network/page resource load:** PASS — the page and all required game resources load on the phone.
+- **Touch controls:** PASS.
+- **Portrait gameplay layout:** **FAIL** — only the upper portion of the game/board is visible on denser rounds, with insufficient usable vertical space; the owner reports that the lower content cannot be practically reached, negatively affecting play.
+- **Start/menu portrait layout:** **FAIL** — the initial screen is too tall; the primary action can fall below the visible viewport.
+- **Landscape layout:** PASS.
+- **Orientation change without state reset:** PASS.
+- **Cross-browser reproduction:** portrait problem observed during testing with both Brave and Chrome, so it is treated as an application responsive-layout defect rather than a single-browser defect.
+
+### Corrective implementation after Android failure
+
+A narrow responsive-layout correction was committed on the same experiment branch after reviewing the Android evidence:
+
+- explicit vertical scrolling fallback on the document;
+- `100dvh`-based shell sizing for mobile browser dynamic viewports;
+- compact portrait top bar and score chips;
+- reduced portrait intro/result padding and typography footprint;
+- compact round header, timer, progress track, and feedback spacing;
+- smaller but still touch-sized portrait panel targets;
+- reduced indicator-cell minimum width/gap so six-cell patterns fit narrow four-column boards;
+- mobile portrait footer hidden to reserve gameplay space;
+- extra narrow-device adjustment at `<= 360px`.
+
+Correction commit: `ed65f07b87438f502578c8962726dac3e18b1a36`.
+
+This correction is **not accepted yet**. The exact Android portrait scenarios must be rerun from the updated branch before Gate 1 can pass.
+
+### Current Gate 1 impact
+
+All required desktop/local checks remain PASS. Android touch, landscape, and state preservation are PASS. Android portrait is a confirmed blocking defect in the previously tested build and has been corrected in code but is **RETEST REQUIRED**.
+
+Gate 1 status: **RETEST REQUIRED — ANDROID PORTRAIT FIX PENDING PHYSICAL VERIFICATION.**
+
+## Deferred to Gate 3
+
+The evidence above does **not** prove and must not be used to infer:
+
 - official YouTube Playables Test Suite behavior;
 - Playables `onPause` / `onResume` lifecycle behavior;
-- YouTube cloud save / score submission inside Playables.
-
-### Gate impact
-
-All required **desktop/local** Gate 1 checks are now PASS: boot, full game loop, wrong-answer and timeout paths, direct replay, local persistence, resize/state preservation, local static validation, and ZIP packaging. Gate 1 remains **RETEST REQUIRED / DEVICE EVIDENCE PENDING** only because the physical Android touch + portrait/landscape checks have not yet been executed. Playables lifecycle/cloud-save verification belongs to Gate 3 in the official environment/Test Suite.
+- YouTube cloud save/load behavior;
+- `sendScore` behavior inside Playables.
