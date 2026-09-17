@@ -33,7 +33,7 @@
         loadCompleted = true;
         return typeof value === "string" ? value : "";
       } catch (_) {
-        loadCompleted = true;
+        loadCompleted = false;
         reportWarning();
         return "";
       }
