@@ -2,7 +2,8 @@
 """Local preflight validator for a YouTube Playables game bundle.
 
 This does not replace the official YouTube Playables Test Suite or certification.
-It verifies only constraints that can be checked from local bundle files.
+It verifies only constraints and static-policy checks that can be evaluated from
+local bundle files.
 """
 
 from __future__ import annotations
@@ -18,7 +19,31 @@ MAX_FILE_SIZE = 30 * MIB
 RECOMMENDED_FILE_SIZE = 512 * 1024
 MAX_TOTAL_SIZE = 250 * MIB
 ALLOWED_NAME = re.compile(r"^[A-Za-z0-9_.-]+$")
-SDK_MARKER = '<script src="https://www.youtube.com/game_api/v1"></script>'
+SDK_URL = "https://www.youtube.com/game_api/v1"
+SDK_MARKER = f'<script src="{SDK_URL}"></script>'
+TEXT_SUFFIXES = {".html", ".htm", ".js", ".mjs", ".css", ".json", ".txt"}
+URL_RE = re.compile(r"https?://[^\s\"'<>)]*")
+
+# Current Playables requirements prohibit using browser locale APIs to choose
+# locale and prohibit Page Visibility-style lifecycle control. Keep these as
+# hard local-preflight errors so accidental regressions are caught early.
+FORBIDDEN_PATTERNS = {
+    r"\bnavigator\.language\b": "Browser locale API navigator.language is not allowed for Playables locale selection",
+    r"\bnavigator\.languages\b": "Browser locale API navigator.languages is not allowed for Playables locale selection",
+    r"\bdocument\.visibilityState\b": "Page Visibility API must not be used for Playables pause/resume",
+    r"\bdocument\.hidden\b": "Page Visibility API must not be used for Playables pause/resume",
+    r"[\"']visibilitychange[\"']": "Page Visibility event must not be used for Playables pause/resume",
+}
+
+# These are not blanket JavaScript prohibitions, but current Playables review
+# guidance warns that they can prevent the code from being evaluated. Surface
+# them as warnings rather than inventing a stronger rule than YouTube states.
+REVIEWABILITY_WARNINGS = {
+    r"\beval\s*\(": "eval() may make the Playable difficult to review",
+    r"\bWebAssembly\b": "WebAssembly may make the Playable difficult to review",
+    r"\bnew\s+Worker\s*\(": "Web Workers may make the Playable difficult to review",
+    r"\bSharedWorker\s*\(": "Shared Workers may make the Playable difficult to review",
+}
 
 
 def format_bytes(value: int) -> str:
@@ -27,6 +52,15 @@ def format_bytes(value: int) -> str:
     if value < MIB:
         return f"{value / 1024:.1f} KiB"
     return f"{value / MIB:.2f} MiB"
+
+
+def read_text(path: Path) -> str | None:
+    if path.suffix.lower() not in TEXT_SUFFIXES:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
 
 
 def validate(root: Path) -> tuple[list[str], list[str]]:
@@ -63,6 +97,24 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
                 f"File exceeds 512 KiB recommendation: {rel} ({format_bytes(size)})"
             )
 
+        text = read_text(path)
+        if text is None:
+            continue
+
+        for pattern, message in FORBIDDEN_PATTERNS.items():
+            if re.search(pattern, text):
+                errors.append(f"{rel}: {message}")
+
+        for pattern, message in REVIEWABILITY_WARNINGS.items():
+            if re.search(pattern, text):
+                warnings.append(f"{rel}: {message}")
+
+        for url in URL_RE.findall(text):
+            if url != SDK_URL:
+                errors.append(
+                    f"{rel}: unexpected external URL '{url}'. Playables bundles should not make external calls outside permitted Google/YouTube technical requirements"
+                )
+
     if total_size >= MAX_TOTAL_SIZE:
         errors.append(
             f"Bundle exceeds 250 MiB hard limit: {format_bytes(total_size)}"
@@ -86,6 +138,10 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         if absolute_local_refs:
             errors.append("Absolute local file reference(s) found in index.html")
 
+    # De-duplicate deterministic static findings so the report stays readable.
+    errors = list(dict.fromkeys(errors))
+    warnings = list(dict.fromkeys(warnings))
+
     print("YouTube Playables local bundle preflight")
     print(f"Bundle: {root.resolve()}")
     print(f"Files: {len(files)} / {MAX_FILES}")
@@ -103,6 +159,8 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
     else:
         print("\nPASS")
         print("- Local static bundle checks passed.")
+        print("- No forbidden locale/Page Visibility patterns were found.")
+        print("- No unexpected external URLs were found in text bundle files.")
         print("- This is NOT an official YouTube Test Suite/certification result.")
 
     return errors, warnings
