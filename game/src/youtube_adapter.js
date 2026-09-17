@@ -141,13 +141,6 @@
           reportWarning();
         }
       }
-    } else {
-      const onVisibilityChange = () => {
-        if (document.visibilityState === "hidden") onPause();
-        if (document.visibilityState === "visible") onResume();
-      };
-      document.addEventListener("visibilitychange", onVisibilityChange);
-      unsubscribers.push(() => document.removeEventListener("visibilitychange", onVisibilityChange));
     }
 
     return () => {
