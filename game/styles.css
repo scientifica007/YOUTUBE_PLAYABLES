@@ -537,67 +537,63 @@ h2 {
   }
 }
 
-
-/* Android landscape compact layout */
+/* Android landscape compact layout — v3 after physical dense-round retest */
 @media (orientation: landscape) and (max-height: 640px) {
+  body {
+    overflow-y: auto;
+  }
+
   .app-shell {
     min-height: 100dvh;
-    padding: 8px 10px;
-    gap: 6px;
+    padding: 4px 8px;
+    gap: 3px;
   }
 
   .topbar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .topbar > div:first-child {
     min-width: 0;
   }
 
-  .eyebrow,
-  .section-kicker {
-    margin-bottom: 2px;
-    font-size: 0.58rem;
-    letter-spacing: 0.08em;
+  .topbar .eyebrow {
+    display: none;
   }
 
   h1 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1rem;
     line-height: 1;
     white-space: nowrap;
-  }
-
-  h2 {
-    margin-bottom: 4px;
-    font-size: 1.12rem;
-    line-height: 1.05;
   }
 
   .score-cluster {
     width: auto;
     flex-wrap: nowrap;
-    gap: 5px;
+    gap: 4px;
   }
 
   .score-chip,
   .timer-box {
-    min-width: 56px;
-    padding: 5px 7px;
-    border-radius: 9px;
+    min-width: 50px;
+    padding: 2px 5px;
+    border-radius: 8px;
   }
 
   .score-label,
   .timer-label {
-    font-size: 0.56rem;
+    font-size: 0.52rem;
+    letter-spacing: 0.05em;
   }
 
   .score-chip strong,
   .timer-box strong {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1;
   }
 
   .screen {
@@ -607,75 +603,106 @@ h2 {
   .intro-panel,
   .result-panel {
     max-width: none;
-    padding: 10px 12px;
-    border-radius: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .intro-panel .section-kicker,
+  .result-panel .section-kicker {
+    margin-bottom: 2px;
+    font-size: 0.56rem;
+  }
+
+  .intro-panel h2,
+  .result-panel h2 {
+    margin-bottom: 4px;
+    font-size: 1rem;
+    line-height: 1.05;
   }
 
   .intro-copy {
-    margin-bottom: 6px;
-    font-size: 0.78rem;
-    line-height: 1.25;
-  }
-
-  .rules-list {
-    margin: 6px 0 8px;
-    padding-inline-start: 1rem;
-    font-size: 0.76rem;
+    margin-bottom: 4px;
+    font-size: 0.74rem;
     line-height: 1.2;
   }
 
+  .rules-list {
+    margin: 4px 0 6px;
+    padding-inline-start: 0.95rem;
+    font-size: 0.72rem;
+    line-height: 1.15;
+  }
+
   .rules-list li + li {
-    margin-top: 2px;
+    margin-top: 1px;
   }
 
   .primary-button {
-    min-height: 38px;
-    padding: 7px 12px;
-    border-radius: 9px;
+    min-height: 36px;
+    padding: 6px 11px;
+    border-radius: 8px;
   }
 
   .status-line {
-    margin-top: 5px;
-    font-size: 0.68rem;
+    margin-top: 4px;
+    font-size: 0.64rem;
   }
 
   .round-header {
     flex-wrap: nowrap;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
   }
 
   .round-header > div:first-child {
     min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+
+  .round-header .section-kicker {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 0.52rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
   }
 
   .round-header h2 {
-    margin-bottom: 0;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.94rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .timer-box {
+  .round-header .timer-box {
     flex: 0 0 auto;
+    min-width: 46px;
   }
 
   .progress-track {
-    height: 5px;
-    margin: 0 0 4px;
+    height: 4px;
+    margin: 0 0 3px;
   }
 
   .inspection-board {
-    gap: 4px;
+    gap: 3px;
   }
 
   .panel-button {
-    min-height: clamp(40px, 11dvh, 52px);
-    padding: 4px;
-    border-radius: 8px;
+    min-height: clamp(38px, 10dvh, 44px);
+    padding: 3px;
+    border-radius: 7px;
   }
 
   .indicator-strip {
-    width: min(100%, 150px);
+    width: min(100%, 138px);
     grid-template-columns: repeat(var(--cells, 4), minmax(4px, 1fr));
-    gap: 3px;
+    gap: 2px;
   }
 
   .indicator-cell {
@@ -683,18 +710,23 @@ h2 {
   }
 
   .feedback {
-    min-height: 0.9em;
-    margin-top: 3px;
-    font-size: 0.68rem;
+    min-height: 0;
+    margin-top: 2px;
+    font-size: 0.64rem;
+    line-height: 1;
+  }
+
+  .feedback:empty {
+    display: none;
   }
 
   .result-score {
-    margin: 3px 0 8px;
-    padding: 8px 10px;
+    margin: 2px 0 6px;
+    padding: 6px 9px;
   }
 
   .result-score strong {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .footer-note {
