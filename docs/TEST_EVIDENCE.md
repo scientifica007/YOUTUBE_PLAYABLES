@@ -15,12 +15,18 @@ Observed environment from supplied screenshots and terminal output:
 
 ### Browser evidence received
 
-Four screenshots were supplied by the project owner during the test session:
+Four screenshots were supplied by the project owner during the first desktop run:
 
 1. Start screen rendered successfully with enabled `Start inspection` control and `Local mode` runtime state.
 2. Active Round 1 / 10 rendered with timer, score, best score, progress bar, and 3×3 panel board.
 3. Active Round 3 / 10 rendered after progression, confirming the run advanced between rounds without page reload.
 4. Result screen rendered after Run 1 completion with final score `625`, best score `625`, message `New best score saved.`, and `Run again` control.
+
+A later desktop session supplied three further screenshots plus an explicit observation from the project owner:
+
+5. Before closing the game, best score had reached `1280`; after stopping and restarting the local server and reopening the game, the start screen still displayed `BEST 1280` while current `SCORE` was `0`.
+6. A new Round 1 / 10 started with `SCORE 0` and `BEST 1280`, confirming a fresh run does not reset the persisted best score.
+7. The later run completed with final score `1263` while best score remained `1280`, confirming a lower subsequent run does not overwrite the saved best.
 
 ### Browser behavior verified
 
@@ -33,11 +39,14 @@ Four screenshots were supplied by the project owner during the test session:
 - **Score/best-score display render:** PASS.
 - **Run reaches completion/result screen:** PASS.
 - **New best score is reflected in UI at run completion:** PASS.
-- **Replay control is present:** PASS for rendering only; replay execution not yet evidenced.
+- **Local best-score persistence across server stop/restart + page reopen:** PASS (`1280` retained).
+- **Fresh run resets current score while retaining best score:** PASS (`SCORE 0`, `BEST 1280`).
+- **Lower later result does not replace persisted best:** PASS (`1263` final, `1280` best retained).
+- **Replay control is present:** PASS for rendering only; direct execution specifically through the `Run again` control is not yet separately evidenced.
 
 ### Local HTTP server evidence
 
-The Python development server returned HTTP 200 for all game resources required by the current prototype:
+The Python development server returned HTTP 200 for all game resources required by the current prototype during the first uncached load:
 
 - `/`
 - `/styles.css`
@@ -45,6 +54,8 @@ The Python development server returned HTTP 200 for all game resources required 
 - `/src/game.js`
 
 A request for `/favicon.ico` returned HTTP 404. This is **non-blocking** for the game because no favicon is currently included or referenced as a required Playables resource.
+
+On the later reopened session, the same required resources returned HTTP `304 Not Modified`. This is normal browser cache revalidation and is consistent with successful reuse of unchanged resources; it is not a game-loading error.
 
 ### Static bundle validation
 
@@ -91,8 +102,7 @@ The supplied evidence does **not** yet prove the following and no PASS should be
 
 - deliberate wrong-answer penalty behavior;
 - timeout reveal behavior;
-- replay starts a clean second run;
-- persistence survives page reload;
+- direct replay execution specifically through the `Run again` button;
 - resize/state preservation;
 - Playables pause/resume callbacks;
 - touch input;
@@ -102,4 +112,4 @@ The supplied evidence does **not** yet prove the following and no PASS should be
 
 ### Gate impact
 
-Gate 1 remains **PARTIALLY EVIDENCED / RETEST REQUIRED**, but two additional Gate 1 checks are now closed: local static validation and ZIP packaging are both PASS. The remaining mandatory local checks are behavioral: wrong-answer/timeout paths, replay, persistence after reload, resize/state preservation, and Android touch/orientation evidence. Playables lifecycle verification belongs to Gate 3 in the official environment/Test Suite.
+Gate 1 remains **PARTIALLY EVIDENCED / RETEST REQUIRED**. Local static validation, ZIP packaging, desktop boot/full-run behavior, and local best-score persistence across a server stop/restart and page reopen are PASS. The remaining mandatory local checks are wrong-answer/timeout paths, direct `Run again` replay execution, resize/state preservation, and Android touch/orientation evidence. Playables lifecycle verification belongs to Gate 3 in the official environment/Test Suite.
